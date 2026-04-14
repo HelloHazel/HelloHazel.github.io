@@ -5,575 +5,788 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>학예당 광고 분석 대시보드 — 2026.04.13</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0d0d10;
-  --surface: #16161f;
-  --surface2: #1e1e2a;
-  --border: #26263a;
-  --accent: #e8c96d;
-  --accent2: #7b9cf0;
-  --accent3: #6ddea8;
-  --danger: #f07b7b;
-  --text: #e8e8f0;
-  --muted: #7a7a96;
-  --dim: #48486a;
-  --patjuk: #f07b7b;
-  --hobak: #e8c96d;
-  --sikhye: #7b9cf0;
-  --gfa: #6ddea8;
+  --ink: #111118;
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --paper3: #e4dfd3;
+  --border: #d4cfc3;
+  --accent-gold: #c9971a;
+  --accent-rust: #c45c3a;
+  --accent-sage: #4a7c59;
+  --accent-slate: #3d5a73;
+  --accent-muted: #8a7d6b;
+  --hobak: #c9971a;
+  --patjuk: #c45c3a;
+  --sikhye: #3d5a73;
+  --gfa: #4a7c59;
+  --coupang: #c45c3a;
+  --warn: #d4572a;
+  --ok: #4a7c59;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-weight: 300; line-height: 1.6; }
 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* HEADER */
 .header {
-  background: linear-gradient(135deg, #0f0f18 0%, #1a1a28 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 40px 0 32px;
-  position: relative; overflow: hidden;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 48px 48px 40px;
+  position: relative;
+  overflow: hidden;
 }
 .header::before {
-  content: ''; position: absolute; top: -80px; right: -60px;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(232,201,109,.06) 0%, transparent 70%);
-  border-radius: 50%;
+  content: '학예당';
+  position: absolute;
+  right: -20px; bottom: -40px;
+  font-family: 'DM Serif Display', serif;
+  font-size: 180px;
+  color: rgba(255,255,255,0.04);
+  white-space: nowrap;
+  pointer-events: none;
 }
-.header-inner { max-width: 1200px; margin: 0 auto; padding: 0 36px; }
-.brand { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-.h-title { font-family: 'Noto Serif KR', serif; font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
-.h-sub { font-size: 13px; color: var(--muted); }
+.header-tag {
+  display: inline-block;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  margin-bottom: 6px;
+}
+.header-meta {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 28px;
+}
 
-.data-scope {
-  display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;
-}
-.scope-tag {
-  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
+.channel-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
   border: 1px solid;
 }
-.scope-ok { background: rgba(109,222,168,.1); color: var(--accent3); border-color: rgba(109,222,168,.3); }
-.scope-partial { background: rgba(232,201,109,.1); color: var(--accent); border-color: rgba(232,201,109,.3); }
-.scope-pending { background: rgba(255,255,255,.05); color: var(--muted); border-color: var(--border); }
+.chip-meta { background: rgba(201,151,26,.15); color: #e8c96d; border-color: rgba(201,151,26,.3); }
+.chip-gfa  { background: rgba(74,124,89,.15); color: #7dc49a; border-color: rgba(74,124,89,.3); }
+.chip-cp   { background: rgba(196,92,58,.15); color: #e8956d; border-color: rgba(196,92,58,.3); }
 
-.legend-row { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
-.leg { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
-.leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+/* LAYOUT */
+.body { max-width: 1280px; margin: 0 auto; padding: 40px 40px 60px; }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 36px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-.grid-1 { margin-bottom: 20px; }
-
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
-  animation: fadeUp .45s ease both;
+.section-head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px; margin-top: 44px;
 }
-.card:nth-child(2) { animation-delay: .06s; }
-.card:nth-child(3) { animation-delay: .12s; }
+.section-head:first-child { margin-top: 0; }
+.section-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.section-title { font-family: 'DM Serif Display', serif; font-size: 20px; font-weight: 400; }
+.section-sub { font-size: 11px; color: var(--accent-muted); margin-left: auto; }
 
-.card-title { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.card-sub { font-size: 12px; color: var(--dim); margin-bottom: 18px; }
+/* GRID */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+.g1 { margin-bottom: 16px; }
+.span2 { grid-column: span 2; }
+
+/* CARD */
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 22px 22px 18px;
+  position: relative;
+}
+.card-label {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent-muted);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
 .chart-wrap { position: relative; width: 100%; }
 
-.kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
 .kpi {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 18px 16px; transition: border-color .2s;
+  background: white;
+  border: 1px solid var(--border);
+  border-top: 3px solid;
+  border-radius: 6px;
+  padding: 16px 16px 14px;
 }
-.kpi:hover { border-color: rgba(232,201,109,.3); }
-.kpi-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.kpi-val { font-size: 22px; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-bottom: 4px; }
-.kpi-sub { font-size: 11px; color: var(--dim); }
-.kpi-t1 { border-top: 2px solid var(--patjuk); }
-.kpi-t2 { border-top: 2px solid var(--hobak); }
-.kpi-t3 { border-top: 2px solid var(--sikhye); }
-.kpi-t4 { border-top: 2px solid var(--gfa); }
+.kpi.k-hobak { border-top-color: var(--hobak); }
+.kpi.k-patjuk { border-top-color: var(--patjuk); }
+.kpi.k-sikhye { border-top-color: var(--sikhye); }
+.kpi.k-gfa    { border-top-color: var(--gfa); }
+.kpi-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-muted); margin-bottom: 6px; }
+.kpi-val { font-size: 24px; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-bottom: 3px; }
+.kpi-sub { font-size: 11px; color: var(--accent-muted); }
 
-.section-label {
-  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--dim); margin-bottom: 16px;
-  display: flex; align-items: center; gap: 12px;
-}
-.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
+/* ANNO */
 .anno {
-  background: var(--surface2); border-left: 3px solid var(--accent);
-  padding: 10px 14px; border-radius: 0 8px 8px 0;
-  font-size: 12px; color: var(--muted); margin-top: 14px; line-height: 1.7;
+  background: var(--paper2);
+  border-left: 3px solid var(--accent-gold);
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #555;
+  margin-top: 12px;
+  border-radius: 0 4px 4px 0;
+  line-height: 1.7;
 }
-.anno strong { color: var(--accent); font-weight: 500; }
-.anno .g { color: var(--accent3); }
-.anno .r { color: var(--danger); }
+.anno strong { color: var(--ink); font-weight: 600; }
+.anno .warn { color: var(--warn); font-weight: 500; }
+.anno .ok { color: var(--ok); font-weight: 500; }
+.anno .note { color: var(--accent-muted); font-style: italic; }
 
-.badge { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 500; margin-left: 6px; }
-.b-new { background: rgba(109,222,168,.12); color: var(--accent3); }
-.b-warn { background: rgba(240,123,123,.12); color: var(--danger); }
-.b-pend { background: rgba(255,255,255,.06); color: var(--muted); }
-
-.pending-box {
-  background: var(--surface2); border: 1px dashed var(--border);
-  border-radius: 12px; padding: 28px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 10px; color: var(--dim); font-size: 13px; text-align: center;
-  min-height: 200px;
+/* KEYWORD TABLE */
+.kw-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.kw-table th {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent-muted);
+  text-align: left;
 }
-.pending-box .icon { font-size: 28px; }
-.pending-box strong { color: var(--muted); font-weight: 500; }
+.kw-table td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  color: var(--ink);
+  vertical-align: middle;
+}
+.kw-table tr:hover td { background: var(--paper); }
+.tag {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-size: 10px; font-weight: 600; white-space: nowrap;
+}
+.tag-a { background: rgba(74,124,89,.12); color: #2d6b40; }
+.tag-b { background: rgba(201,151,26,.12); color: #8a6400; }
+.tag-c { background: rgba(196,92,58,.12); color: #9b3a1a; }
+.tag-ok { background: rgba(74,124,89,.12); color: #2d6b40; }
+.tag-warn { background: rgba(196,92,58,.12); color: #9b3a1a; }
+.tag-watch { background: rgba(201,151,26,.12); color: #8a6400; }
 
+/* MATRIX */
+.matrix { width: 100%; border-collapse: collapse; font-size: 12px; }
+.matrix th, .matrix td {
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  text-align: center;
+}
+.matrix th { background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 500; letter-spacing: .06em; }
+.matrix td:first-child { background: var(--paper2); font-weight: 600; font-size: 13px; text-align: left; }
+.cell-strong { background: rgba(74,124,89,.1); color: #2d6b40; font-weight: 600; }
+.cell-mid    { background: rgba(201,151,26,.1); color: #7a5800; }
+.cell-weak   { background: rgba(196,92,58,.1); color: #8a2800; }
+.cell-watch  { background: rgba(61,90,115,.1); color: #1e3a52; }
+
+/* FOOTER */
 .footer {
-  border-top: 1px solid var(--border); padding: 20px 36px;
-  text-align: center; font-size: 11px; color: var(--dim); margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding: 20px 40px;
+  font-size: 11px;
+  color: var(--accent-muted);
+  text-align: center;
 }
 
-@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+/* ANIM */
+@keyframes up { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.card, .kpi { animation: up .4s ease both; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-inner">
-    <div class="brand">학예당 · 광고 분석 대시보드</div>
-    <div class="h-title">광고 성과 시각화 — 2026년 4월 12일</div>
-    <div class="h-sub">분석 기간: 최근 7일 (4/6~4/12) · 최근 30일 (3/14~4/12)</div>
-    <div class="data-scope">
-      <span class="scope-tag scope-ok">✅ Meta 광고 반영</span>
-      <span class="scope-tag scope-ok">✅ 네이버 채널(애널리틱스) 반영</span>
-      <span class="scope-tag scope-pending">⏳ GFA 캠페인별 ROAS — 파일 대기 중</span>
-      <span class="scope-tag scope-pending">⏳ 쿠팡 매출/광고비 — 파일 대기 중</span>
-    </div>
-    <div class="legend-row">
-      <span class="leg"><span class="leg-dot" style="background:var(--patjuk)"></span>팥죽</span>
-      <span class="leg"><span class="leg-dot" style="background:var(--hobak)"></span>호박죽</span>
-      <span class="leg"><span class="leg-dot" style="background:var(--sikhye)"></span>식혜</span>
-      <span class="leg"><span class="leg-dot" style="background:var(--gfa)"></span>GFA / 네이버</span>
-    </div>
+  <div class="header-tag">Performance Report</div>
+  <h1>학예당 광고 분석 대시보드</h1>
+  <div class="header-meta">기준일: 2026.04.13 &nbsp;·&nbsp; Meta 7일(4/7~4/13) · GFA 주차별 · 쿠팡 30일(3/1~3/31) · 키워드(3/15~4/13)</div>
+  <div class="channel-chips">
+    <span class="chip chip-meta">Meta · 유입 채널</span>
+    <span class="chip chip-gfa">네이버 GFA · 전환 채널</span>
+    <span class="chip chip-cp">쿠팡 · 구매 채널</span>
   </div>
 </div>
 
-<div class="container">
+<div class="body">
 
   <!-- KPI -->
-  <div class="section-label">이번 주 핵심 지표</div>
-  <div class="kpi-strip">
-    <div class="kpi kpi-t1">
-      <div class="kpi-label">팥죽 CTR</div>
-      <div class="kpi-val" style="color:var(--patjuk)">5.85%</div>
-      <div class="kpi-sub">단일 소재 — 30일 6.60% 유지</div>
+  <div class="kpi-grid">
+    <div class="kpi k-hobak">
+      <div class="kpi-label">호박죽 Meta CPC</div>
+      <div class="kpi-val" style="color:var(--hobak)">104원</div>
+      <div class="kpi-sub">클릭 657회 · 7일</div>
     </div>
-    <div class="kpi kpi-t2">
-      <div class="kpi-label">호박죽 CPC</div>
-      <div class="kpi-val" style="color:var(--accent3)">102원</div>
-      <div class="kpi-sub">지난주 101원 → 유지 ✅</div>
+    <div class="kpi k-patjuk">
+      <div class="kpi-label">팥죽 Meta CTR</div>
+      <div class="kpi-val" style="color:var(--patjuk)">5.79%</div>
+      <div class="kpi-sub">클릭 400회 · 7일</div>
     </div>
-    <div class="kpi kpi-t3">
-      <div class="kpi-label">식혜 신규 TOP</div>
-      <div class="kpi-val" style="color:var(--sikhye)">4.54%</div>
-      <div class="kpi-sub">11_갓만들어 CTR — 신규 중 1위</div>
+    <div class="kpi k-gfa">
+      <div class="kpi-label">GFA 메인배너 ROAS</div>
+      <div class="kpi-val" style="color:var(--gfa)">203%</div>
+      <div class="kpi-sub">3종 합산 · 지난주</div>
     </div>
-    <div class="kpi kpi-t4">
-      <div class="kpi-label">GFA 성과형 결제</div>
-      <div class="kpi-val">36건</div>
-      <div class="kpi-sub">7일 매출 1,489,100원</div>
-    </div>
-  </div>
-
-  <!-- 1. CPC 추이 -->
-  <div class="section-label">캠페인별 CPC 추이</div>
-  <div class="grid-1">
-    <div class="card">
-      <div class="card-title">캠페인별 CPC 비교 — 지난주 vs 이번주</div>
-      <div class="card-sub">단위: 원 / 낮을수록 효율적</div>
-      <div class="chart-wrap" style="height:260px"><canvas id="cpcChart"></canvas></div>
-      <div class="anno">
-        <strong>호박죽</strong> 101→102원으로 사실상 <span class="g">유지.</span>
-        <strong>식혜</strong> 84→115원 +37% — 신규 소재 4종 학습 초기 영향. 1주 후 재평가.
-        <strong>팥죽</strong> 143→150원 소폭 상승. 단일 소재 피로도 감지 시작 가능성.
-      </div>
+    <div class="kpi k-sikhye">
+      <div class="kpi-label">쿠팡 파워링크 ROAS</div>
+      <div class="kpi-val" style="color:var(--sikhye)">723%</div>
+      <div class="kpi-sub">P01.식혜 · 30일</div>
     </div>
   </div>
 
-  <!-- 2. CTR — 캠페인 + 팥죽 소재 -->
-  <div class="section-label">소재별 CTR 비교</div>
-  <div class="grid-3">
+  <!-- ① META -->
+  <div class="section-head">
+    <div class="section-num">1</div>
+    <div class="section-title">Meta 광고 성과</div>
+    <div class="section-sub">4/7~4/13 · 유입 효율 중심 해석</div>
+  </div>
+
+  <div class="g2">
     <div class="card">
-      <div class="card-title">캠페인별 CTR — 7일</div>
-      <div class="card-sub">단위: %</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="ctrCampChart"></canvas></div>
+      <div class="card-label">캠페인별 CPC — 7일</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="metaCpc"></canvas></div>
+      <div class="anno">호박죽 <strong>104원</strong>으로 가장 낮음. 팥죽 152원이지만 CTR <span class="ok">5.79%</span>로 반응성 최고.</div>
     </div>
     <div class="card">
-      <div class="card-title">🍲 팥죽 소재별 CTR <span class="badge b-warn">단일 소재</span></div>
-      <div class="card-sub">소재1 단독 운영 중 — 7일 / 30일 비교</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="patjukCtrChart"></canvas></div>
-      <div class="anno">
-        CTR <strong>5.85%</strong>(7일) / <strong>6.60%</strong>(30일)로 일관성 있는 반응성 유지.
-        단일 소재 운영 지속 중 — <span class="r">소재 바리에이션 제작 시급.</span>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">🍵 식혜 신규 소재 4종 CTR <span class="badge b-new">2~3일차</span></div>
-      <div class="card-sub">4/11(금) 집행 시작 — Meta 학습 초기</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="ctrNewChart"></canvas></div>
-      <div class="anno">
-        <strong>11_갓만들어</strong> CTR <span class="g">4.54%</span>로 신규 중 유일하게 반응.<br>
-        나머지 3종 학습 중 — 1주일 후 판단.
-      </div>
+      <div class="card-label">캠페인별 CTR — 7일</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="metaCtr"></canvas></div>
+      <div class="anno">팥죽 CTR <strong>5.79%</strong> · 호박죽 3.69% · 식혜 전체 0.82% (신규 소재 학습 포함).</div>
     </div>
   </div>
 
-  <!-- 3. 호박죽 소재 + 식혜 전체 소재 CTR -->
-  <div class="section-label">소재별 상세 CTR / CPC</div>
-  <div class="grid-2">
+  <div class="g3">
     <div class="card">
-      <div class="card-title">🎃 호박죽 소재별 CTR — 7일</div>
-      <div class="card-sub">단위: %</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="hobakCtrChart"></canvas></div>
-      <div class="anno">
-        <strong>숟가락</strong> 5.38% / <strong>이게바로</strong> 5.44% — 두 소재 반응성 동급.
-        이게바로는 지출 1,877원으로 표본 적음 — 예산 배분 확인 필요.<br>
-        <span class="r">3대가이어온</span> CTR 0.71% — 비활성화 검토.
-      </div>
+      <div class="card-label">호박죽 소재별 CTR</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="hobakCtr"></canvas></div>
+      <div class="anno"><strong>숟가락·이게바로</strong> 5.37~5.44%로 동급. <span class="warn">3대가이어온 0.71%</span> 정리 후보.</div>
     </div>
     <div class="card">
-      <div class="card-title">🎃 호박죽 소재별 CPC — 7일</div>
-      <div class="card-sub">단위: 원</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="hobakCpcChart"></canvas></div>
-      <div class="anno">
-        <strong>숟가락</strong> CPC 92원으로 최저. 전체 클릭 88% 견인.<br>
-        <span class="r">3대가이어온</span> CPC 228원 — 비효율 구간.
-      </div>
+      <div class="card-label">호박죽 소재별 CPC</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="hobakCpc"></canvas></div>
+      <div class="anno">숟가락 <strong>94원</strong>·이게바로 <strong>97원</strong>으로 최저. <span class="warn">3대가이어온 228원</span> 비활성화 권장.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">식혜 신규 소재 5종 CTR <small style="color:var(--warn);font-size:10px">집행 5~7일차</small></div>
+      <div class="chart-wrap" style="height:200px"><canvas id="sikhyeNew"></canvas></div>
+      <div class="anno"><span class="note">학습 초기 — 최종 판단은 10~14일 후.</span> 갓만들어 <strong>1.46%</strong>가 상대적 우위.</div>
     </div>
   </div>
 
-  <!-- 4. 전체 소재 CTR 한눈에 -->
-  <div class="section-label">전체 소재 CTR 한눈에</div>
-  <div class="grid-1">
+  <!-- ② GFA -->
+  <div class="section-head">
+    <div class="section-num">2</div>
+    <div class="section-title">네이버 GFA 성과</div>
+    <div class="section-sub">지난주(4/6~4/12) 확정 수치 · 이번주 초반은 2일치</div>
+  </div>
+
+  <div class="g2">
     <div class="card">
-      <div class="card-title">전체 소재별 CTR 비교 — 7일 (활성 소재 기준)</div>
-      <div class="card-sub">단위: % / 캠페인별 색상 구분</div>
-      <div class="chart-wrap" style="height:280px"><canvas id="allCtrChart"></canvas></div>
+      <div class="card-label">메인 배너 3종 ROAS — 지난주(4/6~4/12)</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="gfaMainRoas"></canvas></div>
       <div class="anno">
-        <strong>팥죽 소재1</strong> 5.85%, <strong>호박죽 숟가락·이게바로</strong> 5.38~5.44%로 상위권.
-        <strong>11_갓만들어</strong>(식혜 신규) 4.54%로 신규 소재 중 유일하게 상위권 진입.
-        <span class="r">8_3대가 이어온 0.39%, 12_가족과함께 0.29%</span> — 학습 중이나 반응 저조.
+        <strong>식혜_배너</strong> 179.5% · <strong>단팥죽_배너</strong> 202.1% · <strong>호박죽_배너</strong> 210.7%<br>
+        메인 배너 3종 합산: 광고비 882,854원 / 구매 45건 / ROAS <span class="ok">203.2%</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">메인 배너 3종 — 광고비 vs 전환매출 (지난주)</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="gfaMainBar"></canvas></div>
+      <div class="anno">광고비 대비 전환매출이 모두 플러스 구간. 단팥죽 809,760원 · 호박죽 799,810원 · 식혜 184,050원.</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-label">주차별 ROAS 비교 — 지난주 vs 이번주 초반</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="gfaWeekly"></canvas></div>
+      <div class="anno">
+        <span class="warn">호박죽 107.5%</span>로 급락 — 단, 이번주 2일치 데이터. 단정 금지, 관찰 필요.<br>
+        <span class="ok">단팥죽 444.7%</span> 급등 — 역시 2일치, 방향성 참고만.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">ADVoost vs 메인 배너 ROAS 비교 (지난주) <small style="color:var(--warn);font-size:10px">ADVoost: 보조 채널</small></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="gfaAdvRoas"></canvas></div>
+      <div class="anno">
+        ADVoost ROAS 수치가 높게 보이는 것은 자동화 채널 특성 때문. <span class="note">메인 배너와 동일 기준 비교 주의.</span><br>
+        <span class="warn">카탈로그 86% → 0%</span> 지속 — 즉시 축소 필요.
       </div>
     </div>
   </div>
 
-  <!-- 5. 지출 + 채널별 결제 -->
-  <div class="section-label">지출 분포 & 채널별 결제금액</div>
-  <div class="grid-2">
+  <!-- ③ COUPANG -->
+  <div class="section-head">
+    <div class="section-num">3</div>
+    <div class="section-title">쿠팡 키워드 전환 인사이트</div>
+    <div class="section-sub">파워링크+브랜드검색(3/15~4/13) · AI 스마트(3/1~3/31)</div>
+  </div>
+
+  <div class="g2">
     <div class="card">
-      <div class="card-title">Meta 캠페인별 지출 비중 — 7일</div>
-      <div class="card-sub">총 지출 170,058원</div>
-      <div class="chart-wrap" style="height:240px"><canvas id="spendChart"></canvas></div>
-      <div class="anno">
-        세 캠페인이 비슷한 비중. 성과 기준으로 <strong>호박죽·팥죽 비중 확대</strong>,
-        식혜는 신규 소재 평가 후 재편 예정.
-      </div>
+      <div class="card-label">쿠팡 AI 스마트 캠페인별 ROAS (3/1~3/31)</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="cpCampRoas"></canvas></div>
+      <div class="anno">AI 스마트_로켓 <span class="ok">520%</span> · 호박죽 412% · 식혜_매최 311% · 단팥죽 251% · <span class="warn">죽-매출최적화 111%</span> 정리 검토.</div>
     </div>
     <div class="card">
-      <div class="card-title">네이버 채널별 결제금액 — 7일</div>
-      <div class="card-sub">단위: 만원 / N+스토어앱 단체주문 추정 제외</div>
-      <div class="chart-wrap" style="height:240px"><canvas id="channelChart"></canvas></div>
+      <div class="card-label">쿠팡 AI 스마트 주차별 ROAS 추이 (3/1~3/31)</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="cpWeekly"></canvas></div>
+      <div class="anno">3/8~3/14 피크 <strong>602%</strong> → 3/22 이후 458%로 하락. 계절성 또는 수요 변동 가능성.</div>
+    </div>
+  </div>
+
+  <div class="g1">
+    <div class="card">
+      <div class="card-label">쿠팡 파워링크 · 브랜드검색 — 캠페인별 30일 성과</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="cpKwCamp"></canvas></div>
       <div class="anno">
-        <strong>GFA 성과형</strong> 148.9만원으로 압도적 1위.
-        <strong>브랜드검색</strong> 유입 100명에 6건 결제 — CVR 6%로 <span class="g">질 높은 채널.</span>
+        <strong>P01.식혜 파워링크</strong> 광고비 342,309원 / 전환매출 2,475,980원 / ROAS <span class="ok">723%</span><br>
+        B01.브랜드검색: 광고비 0원 / 구매전환 53건 / 구매매출 2,016,650원 → 광고 성과가 아닌 <strong>브랜드 수요 지표</strong>로 해석
       </div>
     </div>
   </div>
 
-  <!-- 6. 네이버 채널 유입 vs 결제 -->
-  <div class="section-label">네이버 채널 유입 vs 결제수</div>
-  <div class="grid-1">
+  <!-- KEYWORD TABLE -->
+  <div class="g1">
     <div class="card">
-      <div class="card-title">채널별 유입수 vs 결제수 — 7일 (주요 채널)</div>
-      <div class="card-sub">유입 대비 결제 효율 비교 / N+스토어앱 단체주문 제외</div>
-      <div class="chart-wrap" style="height:260px"><canvas id="channelCvrChart"></canvas></div>
+      <div class="card-label">쿠팡 키워드 전환 분류 (P01.식혜 파워링크 · 3/15~4/13)</div>
+      <table class="kw-table">
+        <thead>
+          <tr>
+            <th>분류</th>
+            <th>패턴/날짜</th>
+            <th>비용</th>
+            <th>클릭</th>
+            <th>전환수</th>
+            <th>전환매출</th>
+            <th>구매매출</th>
+            <th>판단</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-a">A. 매출 만드는</span></td>
+            <td>4/7(화) — 전환 발생</td>
+            <td>9,480원</td>
+            <td>19회</td>
+            <td>1건</td>
+            <td>31,350원</td>
+            <td>31,350원</td>
+            <td><span class="tag tag-ok">유지</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-a">A. 매출 만드는</span></td>
+            <td>4/10(금) — 전환 집중</td>
+            <td>11,905원</td>
+            <td>15회</td>
+            <td>3건</td>
+            <td>141,750원</td>
+            <td>15,750원</td>
+            <td><span class="tag tag-ok">유지</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-a">A. 매출 만드는</span></td>
+            <td>4/11(토) — 전환 발생</td>
+            <td>9,672원</td>
+            <td>17회</td>
+            <td>2건</td>
+            <td>47,120원</td>
+            <td>26,120원</td>
+            <td><span class="tag tag-ok">유지</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-b">B. 클릭 있는데 약함</span></td>
+            <td>4/8(수) — 전환 0건</td>
+            <td>12,133원</td>
+            <td>15회</td>
+            <td>0건</td>
+            <td>0원</td>
+            <td>0원</td>
+            <td><span class="tag tag-warn">상세페이지 보완</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-b">B. 클릭 있는데 약함</span></td>
+            <td>4/9(목) — 전환 0건</td>
+            <td>8,278원</td>
+            <td>16회</td>
+            <td>0건</td>
+            <td>0원</td>
+            <td>0원</td>
+            <td><span class="tag tag-warn">상세페이지 보완</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-c">C. 비효율</span></td>
+            <td>4/12(일) — 전환 0건</td>
+            <td>11,381원</td>
+            <td>23회</td>
+            <td>0건</td>
+            <td>0원</td>
+            <td>0원</td>
+            <td><span class="tag tag-warn">키워드 제외 검토</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-c">C. 비효율</span></td>
+            <td>4/13(월) — 전환 0건</td>
+            <td>13,148원</td>
+            <td>21회</td>
+            <td>0건</td>
+            <td>0원</td>
+            <td>0원</td>
+            <td><span class="tag tag-warn">키워드 제외 검토</span></td>
+          </tr>
+        </tbody>
+      </table>
       <div class="anno">
-        <strong>GFA 성과형</strong>이 유입·결제 모두 압도적. ADVoost쇼핑도 유입 대비 결제 양호.
-        <strong>인스타그램</strong>은 유입 1,355명에 결제 2건으로 직접 전환 낮음 —
-        Meta → 네이버 검색 → 구매 경로 미측정분 포함 추정.
+        30일 중 <strong>전환 발생 14일 / 없음 16일.</strong> 클릭→구매 전환율 3.5%(543클릭 중 19건).<br>
+        <span class="note">상세페이지 보완 포인트:</span> "100% 국내산·무첨가·숙성 기준"을 상단에 배치 → 탐색 의도 유입자의 구매 전환 유도.
       </div>
     </div>
   </div>
 
-  <!-- 7. 30일 누적 -->
-  <div class="section-label">30일 누적 추이</div>
-  <div class="grid-2">
+  <!-- ④ MATRIX -->
+  <div class="section-head">
+    <div class="section-num">4</div>
+    <div class="section-title">상품별 채널 역할 매트릭스</div>
+    <div class="section-sub">수치 기준 실질 회수 채널 정리</div>
+  </div>
+
+  <div class="g1">
     <div class="card">
-      <div class="card-title">캠페인별 누적 지출 — 30일</div>
-      <div class="card-sub">총 626,665원 / 3/14~4/12</div>
-      <div class="chart-wrap" style="height:200px"><canvas id="spend30Chart"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">캠페인별 CTR — 30일 vs 7일 비교</div>
-      <div class="card-sub">누적 트렌드 vs 이번 주</div>
-      <div class="chart-wrap" style="height:200px"><canvas id="ctr30Chart"></canvas></div>
+      <div class="card-label">상품 × 채널 역할 정리</div>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th style="text-align:left">상품</th>
+            <th>Meta (유입)</th>
+            <th>GFA (직접전환)</th>
+            <th>쿠팡 (구매전환)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🎃 호박죽</td>
+            <td class="cell-strong">CPC 104원 / 클릭 657회<br><small>클릭 효율 최강</small></td>
+            <td class="cell-mid">ROAS 211% (지난주)<br><small>이번주 107% — 관찰 중</small></td>
+            <td class="cell-strong">AI 스마트 ROAS 412%<br><small>구매 15건</small></td>
+          </tr>
+          <tr>
+            <td>🍲 팥죽/단팥죽</td>
+            <td class="cell-strong">CTR 5.79% / 클릭 400회<br><small>반응성 최고</small></td>
+            <td class="cell-strong">ROAS 202% (지난주)<br><small>구매 17건</small></td>
+            <td class="cell-mid">ROAS 251%<br><small>구매 11건</small></td>
+          </tr>
+          <tr>
+            <td>🍵 식혜</td>
+            <td class="cell-watch">소재 재편 중<br><small>신규 5종 학습 5~7일차</small></td>
+            <td class="cell-weak">ROAS 180% (지난주)<br><small>상대적으로 약함</small></td>
+            <td class="cell-strong">파워링크 ROAS 723%<br><small>브랜드 수요 확인</small></td>
+          </tr>
+        </tbody>
+      </table>
       <div class="anno">
-        팥죽 30일 <strong>6.60%</strong> → 7일 5.85%로 소폭 하락.
-        식혜 신규 소재 투입으로 7일 CTR 1.52%는 큰 의미 없음 — 1주 후 재평가.
+        <span class="ok">회수 확인 채널:</span> GFA 메인 배너 3종 합산 ROAS 203% / 쿠팡 P01.식혜 ROAS 723% / 쿠팡 AI 스마트 ROAS 520%<br>
+        <span class="warn">정리 대상:</span> GFA 카탈로그(ROAS 86%→0%) · 쿠팡 죽-매출최적화(ROAS 111%)
       </div>
     </div>
   </div>
 
-  <!-- 8. GFA / 쿠팡 대기 -->
-  <div class="section-label">GFA 캠페인별 ROAS · 쿠팡 성과 <span class="badge b-pend">파일 대기 중</span></div>
-  <div class="grid-2">
+  <!-- ⑤ ACTION -->
+  <div class="section-head">
+    <div class="section-num">5</div>
+    <div class="section-title">예산 판단 요약</div>
+    <div class="section-sub">수치 기준 즉시 / 관찰 / 정리</div>
+  </div>
+
+  <div class="g3">
     <div class="card">
-      <div class="pending-box">
-        <div class="icon">📊</div>
-        <strong>GFA 캠페인별 ROAS</strong>
-        <div style="font-size:12px; color:var(--dim); line-height:1.7;">
-          네이버 GFA 관리자 → 캠페인 리포트<br>
-          단팥죽 / 호박죽 / 식혜 별도 ROAS 확인 가능<br>
-          <span style="color:var(--accent)">파일 올려주시면 바로 반영할게요</span>
-        </div>
-      </div>
+      <div class="card-label" style="border-left:3px solid var(--warn);padding-left:8px">🔴 즉시 액션</div>
+      <table class="kw-table">
+        <tbody>
+          <tr><td><strong>GFA 카탈로그</strong></td><td><span class="tag tag-c">ROAS 86%→0%</span></td></tr>
+          <tr><td><strong>쿠팡 죽-매출최적화</strong></td><td><span class="tag tag-c">ROAS 111%, 전환 3건</span></td></tr>
+          <tr><td><strong>Meta 3대가이어온</strong></td><td><span class="tag tag-c">CTR 0.71%, CPC 228원</span></td></tr>
+          <tr><td><strong>팥죽 소재 바리에이션</strong></td><td><span class="tag tag-warn">단일 소재 피로도 대비</span></td></tr>
+        </tbody>
+      </table>
     </div>
     <div class="card">
-      <div class="pending-box">
-        <div class="icon">📦</div>
-        <strong>쿠팡 매출 / 광고비</strong>
-        <div style="font-size:12px; color:var(--dim); line-height:1.7;">
-          쿠팡 Wing → 광고 리포트 또는 판매 리포트<br>
-          매출 / 광고비 / ROAS 반영 예정<br>
-          <span style="color:var(--accent)">파일 올려주시면 바로 반영할게요</span>
-        </div>
-      </div>
+      <div class="card-label" style="border-left:3px solid var(--hobak);padding-left:8px">🟡 관찰 / 단기</div>
+      <table class="kw-table">
+        <tbody>
+          <tr><td><strong>GFA 호박죽_배너</strong></td><td><span class="tag tag-b">이번주 전체 수치 확인</span></td></tr>
+          <tr><td><strong>식혜 신규 소재</strong></td><td><span class="tag tag-b">10~14일차 판단</span></td></tr>
+          <tr><td><strong>ADVoost(3039)</strong></td><td><span class="tag tag-b">방향성 참고 — 표본 소</span></td></tr>
+          <tr><td><strong>이게바로 소재</strong></td><td><span class="tag tag-b">독립 세트 분리 테스트</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-label" style="border-left:3px solid var(--gfa);padding-left:8px">🟢 유지 / 중기</div>
+      <table class="kw-table">
+        <tbody>
+          <tr><td><strong>GFA 단팥죽_배너</strong></td><td><span class="tag tag-ok">ROAS 202% 유지</span></td></tr>
+          <tr><td><strong>GFA 호박죽_배너</strong></td><td><span class="tag tag-ok">추이 확인 후 유지</span></td></tr>
+          <tr><td><strong>쿠팡 P01.식혜</strong></td><td><span class="tag tag-ok">ROAS 723% 유지</span></td></tr>
+          <tr><td><strong>키워드 비전환 제외</strong></td><td><span class="tag tag-ok">상세페이지 보완 병행</span></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
 </div>
 
 <div class="footer">
-  학예당 광고 분석 대시보드 v2 · Meta + 네이버 애널리틱스 기준 · 2026.04.12<br>
-  GFA 캠페인별 / 쿠팡 데이터는 파일 수신 후 업데이트 예정 · 식혜 신규 소재 4종: 4/11(금) 집행 시작
+  학예당 광고 분석 대시보드 v3 &nbsp;·&nbsp; 2026.04.13 &nbsp;·&nbsp; Meta($1=1,370원) · GFA result_5 · 쿠팡 export · 쿠팡 키워드 보고서<br>
+  GFA 이번주 초반 수치(4/13~)는 2일치 — 단정 금지. ADVoost ROAS는 자동화 채널 특성 보정 필요.
 </div>
 
 <script>
 const C = {
-  patjuk:'#f07b7b', hobak:'#e8c96d', sikhye:'#7b9cf0', gfa:'#6ddea8',
-  grid:'rgba(255,255,255,0.07)', text:'#7a7a96',
+  hobak:'#c9971a', patjuk:'#c45c3a', sikhye:'#3d5a73',
+  gfa:'#4a7c59', ink:'#111118', muted:'#8a7d6b',
+  border:'rgba(0,0,0,0.08)',
 };
 const tooltip = {
-  backgroundColor:'#16161f', borderColor:'#26263a', borderWidth:1,
-  titleColor:'#e8e8f0', bodyColor:'#7a7a96', padding:10,
+  backgroundColor:'#111118', borderColor:'rgba(255,255,255,0.1)',
+  borderWidth:1, titleColor:'#f4f1eb', bodyColor:'#a09585', padding:10,
 };
 const base = {
   responsive:true, maintainAspectRatio:false,
   plugins:{ legend:{display:false}, tooltip },
   scales:{
-    x:{ ticks:{color:C.text, font:{size:11,family:'Noto Sans KR'}}, grid:{color:C.grid} },
-    y:{ ticks:{color:C.text, font:{size:11,family:'Noto Sans KR'}}, grid:{color:C.grid} }
+    x:{ ticks:{color:C.muted,font:{size:10,family:'Noto Sans KR'}}, grid:{color:'rgba(0,0,0,0.05)'} },
+    y:{ ticks:{color:C.muted,font:{size:10,family:'Noto Sans KR'}}, grid:{color:'rgba(0,0,0,0.05)'} }
   }
 };
 
-// 1. CPC 비교 (지난주 vs 이번주)
-new Chart(document.getElementById('cpcChart'),{
+// 1. Meta CPC
+new Chart(document.getElementById('metaCpc'),{
   type:'bar',
   data:{
-    labels:['팥죽','호박죽','식혜'],
+    labels:['호박죽','팥죽','식혜(기존소재3)','식혜(신규5종)'],
+    datasets:[{
+      data:[104,152,108,215],
+      backgroundColor:['rgba(201,151,26,0.8)','rgba(196,92,58,0.8)','rgba(61,90,115,0.6)','rgba(61,90,115,0.35)'],
+      borderColor:[C.hobak,C.patjuk,C.sikhye,C.sikhye],
+      borderWidth:1.5, borderRadius:4,
+    }]
+  },
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'원(CPC)',color:C.muted,font:{size:10}}}}}
+});
+
+// 2. Meta CTR
+new Chart(document.getElementById('metaCtr'),{
+  type:'bar',
+  data:{
+    labels:['팥죽','호박죽','식혜(기존)','식혜(신규)'],
+    datasets:[{
+      data:[5.79,3.69,1.09,0.49],
+      backgroundColor:['rgba(196,92,58,0.8)','rgba(201,151,26,0.8)','rgba(61,90,115,0.6)','rgba(61,90,115,0.3)'],
+      borderColor:[C.patjuk,C.hobak,C.sikhye,C.sikhye],
+      borderWidth:1.5, borderRadius:4,
+    }]
+  },
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'CTR(%)',color:C.muted,font:{size:10}}}}}
+});
+
+// 3. 호박죽 소재 CTR
+new Chart(document.getElementById('hobakCtr'),{
+  type:'bar',
+  data:{
+    labels:['숟가락이\n쓰러지지않는','이게바로','호박물에','3대가이어온'],
+    datasets:[{
+      data:[5.37,5.44,3.23,0.71],
+      backgroundColor:['rgba(201,151,26,0.85)','rgba(74,124,89,0.75)','rgba(201,151,26,0.45)','rgba(196,92,58,0.6)'],
+      borderColor:[C.hobak,C.gfa,C.hobak,C.patjuk],
+      borderWidth:1.5, borderRadius:4,
+    }]
+  },
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,max:7,title:{display:true,text:'CTR(%)',color:C.muted,font:{size:10}}}}}
+});
+
+// 4. 호박죽 소재 CPC
+new Chart(document.getElementById('hobakCpc'),{
+  type:'bar',
+  data:{
+    labels:['숟가락이\n쓰러지지않는','이게바로','호박물에','3대가이어온'],
+    datasets:[{
+      data:[94,97,149,228],
+      backgroundColor:['rgba(74,124,89,0.8)','rgba(74,124,89,0.65)','rgba(201,151,26,0.5)','rgba(196,92,58,0.7)'],
+      borderColor:[C.gfa,C.gfa,C.hobak,C.patjuk],
+      borderWidth:1.5, borderRadius:4,
+    }]
+  },
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'원(CPC)',color:C.muted,font:{size:10}}}}}
+});
+
+// 5. 식혜 신규 소재
+new Chart(document.getElementById('sikhyeNew'),{
+  type:'bar',
+  data:{
+    labels:['10_야구장','11_갓만들어','9_아이스팩','8_3대가','12_가족'],
+    datasets:[{
+      data:[2.30,1.46,0.91,0.35,0.26],
+      backgroundColor:['rgba(61,90,115,0.8)','rgba(61,90,115,0.65)','rgba(61,90,115,0.45)','rgba(196,92,58,0.4)','rgba(196,92,58,0.4)'],
+      borderColor:[C.sikhye,C.sikhye,C.sikhye,C.patjuk,C.patjuk],
+      borderWidth:1.5, borderRadius:4,
+    }]
+  },
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'CTR(%)',color:C.muted,font:{size:10}}}}}
+});
+
+// 6. GFA 메인 배너 ROAS
+new Chart(document.getElementById('gfaMainRoas'),{
+  type:'bar',
+  data:{
+    labels:['식혜_배너','단팥죽_배너','호박죽_배너'],
+    datasets:[{
+      label:'지난주 ROAS',
+      data:[179.5,202.1,210.7],
+      backgroundColor:['rgba(61,90,115,0.75)','rgba(196,92,58,0.75)','rgba(201,151,26,0.75)'],
+      borderColor:[C.sikhye,C.patjuk,C.hobak],
+      borderWidth:1.5, borderRadius:4,
+    }]
+  },
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'ROAS(%)',color:C.muted,font:{size:10}}}}}
+});
+
+// 7. GFA 메인 배너 광고비 vs 전환매출
+new Chart(document.getElementById('gfaMainBar'),{
+  type:'bar',
+  data:{
+    labels:['식혜_배너','단팥죽_배너','호박죽_배너'],
     datasets:[
-      { label:'지난주', data:[143,101,84], backgroundColor:'rgba(255,255,255,0.1)', borderColor:'rgba(255,255,255,0.2)', borderWidth:1, borderRadius:6 },
-      { label:'이번주', data:[150,102,115],
-        backgroundColor:['rgba(240,123,123,0.7)','rgba(232,201,109,0.7)','rgba(123,156,240,0.7)'],
-        borderColor:[C.patjuk,C.hobak,C.sikhye], borderWidth:1.5, borderRadius:6 }
+      {label:'광고비',data:[102534,400660,379660],backgroundColor:'rgba(0,0,0,0.1)',borderColor:'rgba(0,0,0,0.2)',borderWidth:1,borderRadius:4},
+      {label:'전환매출',data:[184050,809760,799810],
+        backgroundColor:['rgba(61,90,115,0.7)','rgba(196,92,58,0.7)','rgba(201,151,26,0.7)'],
+        borderColor:[C.sikhye,C.patjuk,C.hobak],borderWidth:1.5,borderRadius:4}
     ]
   },
   options:{...base,
-    plugins:{...base.plugins, legend:{display:true, labels:{color:C.text,font:{size:11},boxWidth:12,padding:16}}},
-    scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'원 (CPC)',color:C.text,font:{size:11}}}}
+    plugins:{...base.plugins,legend:{display:true,labels:{color:C.muted,font:{size:10},boxWidth:10,padding:12}}},
+    scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'원',color:C.muted,font:{size:10}}}}
   }
 });
 
-// 2. 캠페인 CTR 7일
-new Chart(document.getElementById('ctrCampChart'),{
+// 8. GFA 주차별 ROAS 비교 (지난주 vs 이번주)
+new Chart(document.getElementById('gfaWeekly'),{
   type:'bar',
   data:{
-    labels:['팥죽','호박죽','식혜(전체)','식혜(소재3)'],
-    datasets:[{
-      data:[5.85,3.66,1.52,1.45],
-      backgroundColor:['rgba(240,123,123,0.75)','rgba(232,201,109,0.75)','rgba(123,156,240,0.4)','rgba(123,156,240,0.7)'],
-      borderColor:[C.patjuk,C.hobak,C.sikhye,C.sikhye], borderWidth:1.5, borderRadius:6,
-    }]
+    labels:['식혜','단팥죽','호박죽'],
+    datasets:[
+      {label:'지난주(4/6~12)',data:[179.5,202.1,210.7],backgroundColor:'rgba(0,0,0,0.12)',borderColor:'rgba(0,0,0,0.2)',borderWidth:1,borderRadius:4},
+      {label:'이번주초반(4/13~, 2일치)',
+        data:[207.6,444.7,107.5],
+        backgroundColor:['rgba(61,90,115,0.7)','rgba(196,92,58,0.7)','rgba(201,151,26,0.7)'],
+        borderColor:[C.sikhye,C.patjuk,C.hobak],borderWidth:1.5,borderRadius:4}
+    ]
   },
-  options:{...base, scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'CTR (%)',color:C.text,font:{size:11}}}}}
+  options:{...base,
+    plugins:{...base.plugins,legend:{display:true,labels:{color:C.muted,font:{size:10},boxWidth:10,padding:12}}},
+    scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'ROAS(%)',color:C.muted,font:{size:10}}}}
+  }
 });
 
-// 3. 팥죽 소재별 CTR (7일 vs 30일)
-new Chart(document.getElementById('patjukCtrChart'),{
+// 9. GFA ADVoost vs 메인배너 ROAS
+new Chart(document.getElementById('gfaAdvRoas'),{
   type:'bar',
   data:{
-    labels:['소재1 (7일)','소재1 (30일)'],
+    labels:['식혜_배너','단팥죽_배너','호박죽_배너','ADVoost\n40~99','ADVoost\n3039','카탈로그'],
     datasets:[{
-      data:[5.85, 6.60],
-      backgroundColor:['rgba(240,123,123,0.8)','rgba(240,123,123,0.35)'],
-      borderColor:[C.patjuk,C.patjuk], borderWidth:1.5, borderRadius:6,
-    }]
-  },
-  options:{...base, scales:{...base.scales, y:{...base.scales.y, min:0, max:8, title:{display:true,text:'CTR (%)',color:C.text,font:{size:11}}}}}
-});
-
-// 4. 식혜 신규 소재 CTR
-new Chart(document.getElementById('ctrNewChart'),{
-  type:'bar',
-  data:{
-    labels:['11_갓만들어','9_아이스팩','8_3대가이어온','12_가족과함께'],
-    datasets:[{
-      data:[4.54,0.91,0.39,0.29],
-      backgroundColor:['rgba(109,222,168,0.8)','rgba(123,156,240,0.45)','rgba(123,156,240,0.45)','rgba(123,156,240,0.45)'],
-      borderColor:[C.gfa,C.sikhye,C.sikhye,C.sikhye], borderWidth:1.5, borderRadius:6,
-    }]
-  },
-  options:{...base, scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'CTR (%)',color:C.text,font:{size:11}}}}}
-});
-
-// 5. 호박죽 소재별 CTR
-new Chart(document.getElementById('hobakCtrChart'),{
-  type:'bar',
-  data:{
-    labels:['숟가락이\n쓰러지지않는','이게바로','호박물에','3대가이어온'],
-    datasets:[{
-      data:[5.38,5.44,3.09,0.71],
-      backgroundColor:['rgba(232,201,109,0.85)','rgba(109,222,168,0.7)','rgba(232,201,109,0.4)','rgba(240,123,123,0.5)'],
-      borderColor:[C.hobak,C.gfa,C.hobak,C.patjuk], borderWidth:1.5, borderRadius:6,
-    }]
-  },
-  options:{...base, scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'CTR (%)',color:C.text,font:{size:11}}}}}
-});
-
-// 6. 호박죽 소재별 CPC
-new Chart(document.getElementById('hobakCpcChart'),{
-  type:'bar',
-  data:{
-    labels:['숟가락이\n쓰러지지않는','이게바로','호박물에','3대가이어온'],
-    datasets:[{
-      data:[92,89,155,228],
-      backgroundColor:['rgba(232,201,109,0.85)','rgba(109,222,168,0.7)','rgba(232,201,109,0.4)','rgba(240,123,123,0.6)'],
-      borderColor:[C.hobak,C.gfa,C.hobak,C.patjuk], borderWidth:1.5, borderRadius:6,
-    }]
-  },
-  options:{...base, scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'원 (CPC)',color:C.text,font:{size:11}}}}}
-});
-
-// 7. 전체 소재 CTR 한눈에
-new Chart(document.getElementById('allCtrChart'),{
-  type:'bar',
-  data:{
-    labels:['팥죽\n소재1','호박죽\n숟가락','호박죽\n이게바로','식혜\n소재3','11_\n갓만들어','호박죽\n호박물에','9_\n아이스팩','호박죽\n3대가이어온','8_\n3대가이어온','12_\n가족과함께'],
-    datasets:[{
-      data:[5.85,5.38,5.44,1.45,4.54,3.09,0.91,0.71,0.39,0.29],
+      data:[179.5,202.1,210.7,436.5,469.2,86.0],
       backgroundColor:[
-        'rgba(240,123,123,0.8)',
-        'rgba(232,201,109,0.8)','rgba(232,201,109,0.6)',
-        'rgba(123,156,240,0.7)',
-        'rgba(109,222,168,0.8)',
-        'rgba(232,201,109,0.4)',
-        'rgba(123,156,240,0.5)',
-        'rgba(240,123,123,0.35)',
-        'rgba(123,156,240,0.35)','rgba(123,156,240,0.35)',
+        'rgba(61,90,115,0.7)','rgba(196,92,58,0.7)','rgba(201,151,26,0.7)',
+        'rgba(74,124,89,0.45)','rgba(74,124,89,0.45)','rgba(196,92,58,0.35)',
       ],
-      borderColor:[
-        C.patjuk, C.hobak, C.hobak, C.sikhye, C.gfa,
-        C.hobak, C.sikhye, C.patjuk, C.sikhye, C.sikhye,
+      borderColor:[C.sikhye,C.patjuk,C.hobak,C.gfa,C.gfa,C.patjuk],
+      borderWidth:1.5, borderRadius:4,
+    }]
+  },
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'ROAS(%)',color:C.muted,font:{size:10}}}}}
+});
+
+// 10. 쿠팡 AI 스마트 캠페인 ROAS
+new Chart(document.getElementById('cpCampRoas'),{
+  type:'bar',
+  data:{
+    labels:['AI스마트_로켓','식혜_매최','호박죽','단팥죽','식혜수동_1','죽-매출최적화'],
+    datasets:[{
+      data:[520.41,310.86,412.43,251.02,168.94,110.7],
+      backgroundColor:[
+        'rgba(74,124,89,0.85)','rgba(61,90,115,0.7)','rgba(201,151,26,0.75)',
+        'rgba(196,92,58,0.7)','rgba(61,90,115,0.45)','rgba(196,92,58,0.35)',
       ],
-      borderWidth:1.5, borderRadius:6,
+      borderColor:[C.gfa,C.sikhye,C.hobak,C.patjuk,C.sikhye,C.patjuk],
+      borderWidth:1.5, borderRadius:4,
     }]
   },
-  options:{...base, scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'CTR (%)',color:C.text,font:{size:11}}}}}
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'ROAS(%)',color:C.muted,font:{size:10}}}}}
 });
 
-// 8. Meta 지출 도넛
-new Chart(document.getElementById('spendChart'),{
-  type:'doughnut',
+// 11. 쿠팡 주차별 ROAS
+new Chart(document.getElementById('cpWeekly'),{
+  type:'line',
   data:{
-    labels:['팥죽 58,691원','호박죽 65,733원','식혜 45,635원'],
+    labels:['3/1~3/7','3/8~3/14','3/15~3/21','3/22~3/28','3/29~3/31'],
     datasets:[{
-      data:[58691,65733,45635],
-      backgroundColor:['rgba(240,123,123,0.8)','rgba(232,201,109,0.8)','rgba(123,156,240,0.8)'],
-      borderColor:['#0d0d10'], borderWidth:3, hoverOffset:6,
+      data:[499.26,602.09,562.23,458.08,426.26],
+      borderColor:C.patjuk, backgroundColor:'rgba(196,92,58,0.08)',
+      borderWidth:2.5, pointRadius:5, pointBackgroundColor:'white',
+      pointBorderColor:C.patjuk, pointBorderWidth:2,
+      tension:0.3, fill:true,
     }]
   },
-  options:{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{display:true,position:'bottom',labels:{color:C.text,font:{size:11,family:'Noto Sans KR'},boxWidth:12,padding:12}}, tooltip },
-    cutout:'62%',
-  }
+  options:{...base,scales:{...base.scales,y:{...base.scales.y,min:300,title:{display:true,text:'ROAS(%)',color:C.muted,font:{size:10}}}}}
 });
 
-// 9. 채널별 결제금액 가로막대
-new Chart(document.getElementById('channelChart'),{
+// 12. 쿠팡 파워링크+브랜드검색 성과
+new Chart(document.getElementById('cpKwCamp'),{
   type:'bar',
   data:{
-    labels:['GFA 성과형','가격비교-통합검색','ADVoost쇼핑','브랜드검색','사이트검색광고','인스타그램'],
-    datasets:[{
-      data:[148.91,59.01,50.65,17.53,19.65,7.72],
-      backgroundColor:['rgba(109,222,168,0.85)','rgba(109,222,168,0.45)','rgba(109,222,168,0.45)','rgba(232,201,109,0.7)','rgba(232,201,109,0.45)','rgba(123,156,240,0.45)'],
-      borderColor:[C.gfa,C.gfa,C.gfa,C.hobak,C.hobak,C.sikhye], borderWidth:1.5, borderRadius:6,
-    }]
-  },
-  options:{...base, indexAxis:'y',
-    scales:{
-      x:{...base.scales.x, title:{display:true,text:'만원',color:C.text,font:{size:11}}},
-      y:{ticks:{color:C.text,font:{size:10,family:'Noto Sans KR'}}, grid:{color:C.grid}}
-    }
-  }
-});
-
-// 10. 채널별 유입 vs 결제 (묶음)
-new Chart(document.getElementById('channelCvrChart'),{
-  type:'bar',
-  data:{
-    labels:['GFA 성과형','인스타그램','ADVoost쇼핑','가격비교-통합검색','사이트검색광고','브랜드검색'],
+    labels:['P01.식혜\n파워링크','P99.벌크\n파워링크','B01.브랜드검색\n(브랜드 수요 지표)'],
     datasets:[
-      { label:'유입수', data:[2055,1355,798,457,181,100],
-        backgroundColor:'rgba(255,255,255,0.1)', borderColor:'rgba(255,255,255,0.2)', borderWidth:1, borderRadius:6, yAxisID:'y' },
-      { label:'결제수', data:[36,2,17,12,3,6],
-        backgroundColor:['rgba(109,222,168,0.8)','rgba(123,156,240,0.5)','rgba(109,222,168,0.6)','rgba(109,222,168,0.5)','rgba(232,201,109,0.5)','rgba(232,201,109,0.8)'],
-        borderColor:[C.gfa,C.sikhye,C.gfa,C.gfa,C.hobak,C.hobak], borderWidth:1.5, borderRadius:6, yAxisID:'y1' },
-    ]
-  },
-  options:{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{display:true, labels:{color:C.text,font:{size:11},boxWidth:12,padding:16}}, tooltip },
-    scales:{
-      x:{ ticks:{color:C.text,font:{size:10,family:'Noto Sans KR'}}, grid:{color:C.grid} },
-      y:{ type:'linear', position:'left', ticks:{color:C.text,font:{size:11}}, grid:{color:C.grid}, title:{display:true,text:'유입수',color:C.text,font:{size:11}} },
-      y1:{ type:'linear', position:'right', ticks:{color:C.text,font:{size:11}}, grid:{drawOnChartArea:false}, title:{display:true,text:'결제수',color:C.text,font:{size:11}} },
-    }
-  }
-});
-
-// 11. 30일 지출
-new Chart(document.getElementById('spend30Chart'),{
-  type:'bar',
-  data:{
-    labels:['팥죽','호박죽','식혜'],
-    datasets:[{
-      data:[306195,211281,109189],
-      backgroundColor:['rgba(240,123,123,0.7)','rgba(232,201,109,0.7)','rgba(123,156,240,0.7)'],
-      borderColor:[C.patjuk,C.hobak,C.sikhye], borderWidth:1.5, borderRadius:6,
-    }]
-  },
-  options:{...base, scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'원',color:C.text,font:{size:11}}}}}
-});
-
-// 12. 30일 vs 7일 CTR
-new Chart(document.getElementById('ctr30Chart'),{
-  type:'bar',
-  data:{
-    labels:['팥죽','호박죽','식혜'],
-    datasets:[
-      { label:'30일', data:[6.60,3.32,1.51], backgroundColor:'rgba(255,255,255,0.1)', borderColor:'rgba(255,255,255,0.2)', borderWidth:1, borderRadius:6 },
-      { label:'7일', data:[5.85,3.66,1.52],
-        backgroundColor:['rgba(240,123,123,0.7)','rgba(232,201,109,0.7)','rgba(123,156,240,0.7)'],
-        borderColor:[C.patjuk,C.hobak,C.sikhye], borderWidth:1.5, borderRadius:6 }
+      {label:'광고비',data:[342309,4345,0],backgroundColor:'rgba(0,0,0,0.1)',borderColor:'rgba(0,0,0,0.2)',borderWidth:1,borderRadius:4},
+      {label:'전환매출',data:[2475980,156360,4330650],
+        backgroundColor:['rgba(61,90,115,0.75)','rgba(74,124,89,0.6)','rgba(201,151,26,0.55)'],
+        borderColor:[C.sikhye,C.gfa,C.hobak],borderWidth:1.5,borderRadius:4}
     ]
   },
   options:{...base,
-    plugins:{...base.plugins, legend:{display:true, labels:{color:C.text,font:{size:11},boxWidth:12,padding:16}}},
-    scales:{...base.scales, y:{...base.scales.y, title:{display:true,text:'CTR (%)',color:C.text,font:{size:11}}}}
+    plugins:{...base.plugins,legend:{display:true,labels:{color:C.muted,font:{size:10},boxWidth:10,padding:12}}},
+    scales:{...base.scales,y:{...base.scales.y,title:{display:true,text:'원',color:C.muted,font:{size:10}}}}
   }
 });
 </script>
